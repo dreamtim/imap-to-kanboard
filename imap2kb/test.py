@@ -2,7 +2,7 @@ import os
 import json
 import unittest
 
-from parser import serialize_mail
+from eml_parser import serialize_mail
 
 
 def get_email_as_bytes(name):
