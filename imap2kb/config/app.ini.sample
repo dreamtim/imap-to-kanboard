@@ -1,0 +1,34 @@
+[APP]
+
+;app_mode = DEBUG
+app_mode = PRODUCTION
+delay = 300
+
+[KANBOARD]
+
+api_key = xxxxxxxxxxxxx
+api_url =http://yourdomain.com/jsonrpc.php
+project_id =1
+
+allowed_attachments_type=[".docx",".pdf",".doc"]
+
+[IMAP]
+
+transport =imap+ssl
+
+hostname=mail.mailhost.com
+username=mail@yourdomain.com
+password=XXXXXXX
+port=993
+
+inbox=INBOX
+error=ERROR
+success=PROCESSED
+spam=Spam
+on_success=move
+
+
+[LOG]
+log_level =INFO
+;log_level =DEBUG
+log_path = /var/log/imap2kb

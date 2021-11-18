@@ -5,6 +5,7 @@ import json
 import quopri
 import re
 import uuid
+import os
 from io import BytesIO
 
 import mailparser
@@ -115,6 +116,35 @@ def get_eml(raw_mail, compress_eml):
             f.write(raw_mail)
         content = file.getvalue()
     return content
+
+def extract (msgfilecontent, key):
+    """Extracts all data from e-mail, including From, To, etc., and returns it as a dictionary.
+    msgfile -- A file-like readable object
+    key     -- Some ID string for that particular Message. Can be a file name or anything.
+    Returns dict()
+    Keys: from, to, subject, date, text, html, parts[, files]
+    Key files will be present only when message contained binary files.
+    For more see __doc__ for pullout() and caption() functions.
+    """
+    m = message_from_file(msgfile)
+    From, To, Subject, Date = caption(m)
+    Text, Html, Files, Parts = pullout(m, key)
+    Text = Text.strip(); Html = Html.strip()
+    msg = {"subject": Subject, "from": From, "to": To, "date": Date,
+        "text": Text, "html": Html, "parts": Parts}
+    if Files: msg["files"] = Files
+    return msg
+
+
+def open_eml(filepath,mailfile) : 
+
+    #f = open(os.path.join(os.path.normpath(filepath),mailfile), "r")
+    mail  =  mailparser.parse_from_file(os.path.join(os.path.normpath(filepath),mailfile))
+    #f.close()
+    
+    print(mail)
+    return mail
+        
 
 
 def serialize_mail(raw_mail, compress_eml=False):

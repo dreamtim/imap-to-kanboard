@@ -1,20 +1,43 @@
+import logging
+import imaplib
+from config import cfg
+
+
+transports = {
+    'imap': imaplib.IMAP4,
+    'imap+ssl': imaplib.IMAP4_SSL
+}
 
 class IMAPClient(object):
 
-    def __init__(self, config):
-        transport = config['imap']['transport']
-        hostname = config['imap']['hostname']
-        port = config['imap']['port']
+    def __init__(self, config,checkspam=False):
+
+        self.logger = logging.getLogger('root')
+        transport = transports[cfg['IMAP']['transport']]
+        hostname = cfg['IMAP']['hostname']
+        port = cfg['IMAP']['port']
+
+
         self.client = transport(host=hostname, port=port)
-        print("Connected to mail server")
-        username = config['imap']['username']
-        password = config['imap']['password']
+
+        self.logger.debug("Connected to mail server")
+        # print("Connected to mail server")
+        username = cfg['IMAP']['username']
+        password = cfg['IMAP']['password']
         if username and password:
             login = self.client.login(username, password)
             if login[0] != 'OK':
                 raise Exception("Unable to login", login)
-        print("Logged in")
-        select_folder = self.client.select(config['imap']['inbox'])
+
+        self.logger.debug("Logged in to {}".format(hostname))
+        # print("Logged in")
+
+        if checkspam :
+            "Also checking spams"
+            select_folder = self.client.select(cfg['IMAP']['spam'])
+        else :
+            select_folder = self.client.select(cfg['IMAP']['inbox'])
+
         if select_folder[0] != 'OK':
             raise Exception("Unable to select folder", select_folder)
 
@@ -33,27 +56,35 @@ class IMAPClient(object):
 
     def connection_close(self):
         self.client.close()
-        print("Connection closed")
+        self.logger.debug("Connection closed")
+        # print("Connection closed")
         self.client.logout()
-        print("Logged out")
+
+        self.logger.debug("Logged out")
+        # print("Logged out")
 
     def move(self, msg_id, folder):
-        print("Going to move {} to {}".format(msg_id, folder))
+        # print("Going to move {} to {}".format(msg_id, folder))
+        self.logger.debug("Going to move {} to {}".format(msg_id, folder))
         self.copy(folder, msg_id)
         self.mark_delete(msg_id)
 
     def mark_delete(self, msg_id):
-        print("Going to mark as deleted {}".format(msg_id))
+        self.logger.debug("Going to mark as deleted {}".format(msg_id))
+        # print("Going to mark as deleted {}".format(msg_id))
         delete_result, _ = self.client.uid('STORE', msg_id,
                                            '+FLAGS', '(\Deleted)')
         if delete_result != 'OK':
             raise Exception("Failed to mark as deleted msg {}".format(msg_id))
 
     def copy(self, folder, msg_id):
-        print("Going to copy {} to {}".format(msg_id, folder))
+        self.logger.debug("Going to copy {} to {}".format(msg_id, folder))
+        # print("Going to copy {} to {}".format(msg_id, folder))
         copy_result, data = self.client.uid('COPY', msg_id, folder)
         if copy_result != 'OK':
-            print(copy_result, data)
+            self.logger.debug(copy_result)
+            self.logger.debug(data)
+            # print(copy_result, data)
             raise Exception("Failed to copy msg {} to {}".
                             format(msg_id, folder))
 

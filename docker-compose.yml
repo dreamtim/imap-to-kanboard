@@ -2,15 +2,18 @@
 version: '3'
 services:
 
-  daemon:
-    build: .
-    environment:
-      IMAP_URL: ${IMAP_URL}
-      WEBHOOK_URL: http://mock:5000/
-      ON_SUCCESSS: 'delete'
+  imap2kb:
+    build: imap2kb
+    # environment:
+      # IMAP_URL: ${IMAP_URL}
+      # WEBHOOK_URL: ${WEBHOOK_URL}
+      # ON_SUCCESSS: 'delete'
+    volumes: 
+        - ./log:/var/log/imap2kb/
+        - ./config:/usr/src/imap2kb/config
 
-  mock:
-    build:
-      context: mock
-    ports:
-      - 5000:5000
+  # mock:
+    # build:
+      # context: mock
+    # ports:
+      # - 5000:5000
